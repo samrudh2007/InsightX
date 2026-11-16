@@ -1,0 +1,13 @@
+review_id,date,product,rating,feedback,channel
+1,2026-10-01,Mobile App,2,Payment failed during checkout,App Store
+2,2026-10-02,Website,5,Very easy to use,Website
+3,2026-10-03,Mobile App,1,Refund is taking too long,App Store
+4,2026-10-04,Delivery,2,My order arrived late,Survey
+5,2026-10-05,Website,4,Good shopping experience,Website
+6,2026-10-06,Mobile App,1,Application crashes when opening,App Store
+7,2026-10-07,Delivery,2,Delivery was delayed again,Survey
+8,2026-10-08,Mobile App,5,Payment was quick and easy,App Store
+9,2026-10-09,Website,3,Website is sometimes slow,Website
+10,2026-10-10,Delivery,1,Order never arrived,Survey
+11,2026-10-11,Mobile App,2,Payment failed again,App Store
+12,2026-10-12,Website,5,Excellent experience,Website
