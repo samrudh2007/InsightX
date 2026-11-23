@@ -52,23 +52,66 @@ empty_feedback = (
 )
 
 print("Empty feedback:", empty_feedback)
+# 7. DATA CLEANING
+
+print("\n========== DATA CLEANING ==========")
+
+# Create a copy of original data
+cleaned_data = data.copy()
+
+# Remove extra spaces from feedback
+cleaned_data["feedback"] = (
+    cleaned_data["feedback"].astype("string").str.strip()
+)
+
+# Identify valid ratings
+valid_ratings = cleaned_data["rating"].between(1, 5)
+
+# Identify valid feedback
+valid_feedback = (
+    cleaned_data["feedback"].notna()
+    & cleaned_data["feedback"].ne("")
+)
+
+# Identify duplicate records
+unique_records = ~cleaned_data.duplicated()
+
+# Keep only valid records
+cleaned_data = cleaned_data[
+    valid_ratings & valid_feedback & unique_records
+].copy()
+
+# Display cleaning results
+print("Original records:", len(data))
+print("Clean records:", len(cleaned_data))
+print("Removed records:", len(data) - len(cleaned_data))
 
 
 # 6. Calculate average rating
 print("\nAVERAGE CUSTOMER RATING")
-print(data["rating"].mean())
+# 7. Calculate average rating
+print("\nAVERAGE CUSTOMER RATING")
+print(cleaned_data["rating"].mean())
 
-# 7. Customer rating distribution
+# 8. Customer rating distribution
 print("\nCUSTOMER RATING DISTRIBUTION")
 
-rating_distribution = data["rating"].value_counts().sort_index()
+rating_distribution = cleaned_data["rating"].value_counts().sort_index()
 
 print(rating_distribution)
 
-# 8. Classify reviews using ratings
-positive_reviews = data[data["rating"] >= 4]
-negative_reviews = data[data["rating"] <= 2]
-neutral_reviews = data[data["rating"] == 3]
+# 9. Classify reviews using ratings
+positive_reviews = cleaned_data[cleaned_data["rating"] >= 4]
+negative_reviews = cleaned_data[cleaned_data["rating"] <= 2]
+neutral_reviews = cleaned_data[cleaned_data["rating"] == 3]
+
+# 10. Display rating-based classification summary
+print("\nCUSTOMER SENTIMENT SUMMARY")
+
+print("Positive reviews:", len(positive_reviews))
+print("Neutral reviews:", len(neutral_reviews))
+print("Negative reviews:", len(negative_reviews))
+
 
 # 9. Display rating-based classification summary
 print("\nCUSTOMER SENTIMENT SUMMARY")
