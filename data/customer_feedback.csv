@@ -11,3 +11,5 @@ review_id,date,product,rating,feedback,channel
 10,2026-10-10,Delivery,1,Order never arrived,Survey
 11,2026-10-11,Mobile App,2,Payment failed again,App Store
 12,2026-10-12,Website,5,Excellent experience,Website
+13,2026-10-13,Mobile App,8,Application is excellent,App Store
+14,2026-10-14,Website,3,,Website

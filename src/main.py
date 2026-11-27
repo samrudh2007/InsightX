@@ -1,123 +1,145 @@
+
 import pandas as pd
 
 # ==========================================
 # INSIGHTX - CUSTOMER INTELLIGENCE PLATFORM
 # ==========================================
 
-# 1. Load customer feedback
+# 1. LOAD CUSTOMER FEEDBACK
+
 data = pd.read_csv("data/customer_feedback.csv")
 
 print("\n========== INSIGHTX ==========")
 
-# 2. Display customer feedback
+# 2. DISPLAY CUSTOMER FEEDBACK
+
 print("\nCUSTOMER FEEDBACK")
 print(data.head())
 
-# 3. Display dataset size
-print("\nDATASET SIZE")
-print(f"Total reviews: {data.shape[0]}")
-print(f"Total columns: {data.shape[1]}")
+# 3. DATASET SIZE
 
-# 4. Display column names
+print("\nDATASET SIZE")
+print("Total reviews:", data.shape[0])
+print("Total columns:", data.shape[1])
+
+# 4. COLUMN NAMES
+
 print("\nCOLUMN NAMES")
 print(data.columns.tolist())
 
-# 5. Check missing values
+# 5. MISSING VALUES
+
 print("\nMISSING VALUES")
 print(data.isnull().sum())
+
+
+# ==========================================
 # 6. DATA QUALITY CHECKS
+# ==========================================
 
 print("\n========== DATA QUALITY CHECKS ==========")
 
-# Check duplicate records
-duplicate_count = data.duplicated().sum()
+duplicate_mask = data.duplicated()
 
-print("\nDuplicate records:", duplicate_count)
+missing_feedback_mask = data["feedback"].isnull()
 
-# Check missing feedback
-missing_feedback = data["feedback"].isnull().sum()
+invalid_ratings_mask = ~data["rating"].between(1, 5)
 
-print("Missing feedback:", missing_feedback)
-
-# Check invalid ratings
-invalid_ratings = data[
-    (data["rating"] < 1) | (data["rating"] > 5)
-]
-
-print("Invalid ratings:", len(invalid_ratings))
-
-# Check empty feedback
-empty_feedback = (
-    data["feedback"].astype("string").str.strip().eq("").sum()
+empty_feedback_mask = (
+    data["feedback"].astype("string").str.strip().eq("")
 )
 
-print("Empty feedback:", empty_feedback)
+print("Duplicate records:", duplicate_mask.sum())
+print("Missing feedback:", missing_feedback_mask.sum())
+print("Invalid ratings:", invalid_ratings_mask.sum())
+print("Empty feedback:", empty_feedback_mask.sum())
+
+
+# ==========================================
 # 7. DATA CLEANING
+# ==========================================
 
 print("\n========== DATA CLEANING ==========")
 
-# Create a copy of original data
+# Preserve original data
 cleaned_data = data.copy()
 
-# Remove extra spaces from feedback
+# Remove unnecessary spaces
 cleaned_data["feedback"] = (
     cleaned_data["feedback"].astype("string").str.strip()
 )
 
-# Identify valid ratings
+# Create validation conditions
 valid_ratings = cleaned_data["rating"].between(1, 5)
 
-# Identify valid feedback
 valid_feedback = (
     cleaned_data["feedback"].notna()
     & cleaned_data["feedback"].ne("")
 )
 
-# Identify duplicate records
 unique_records = ~cleaned_data.duplicated()
 
-# Keep only valid records
-cleaned_data = cleaned_data[
-    valid_ratings & valid_feedback & unique_records
-].copy()
+# Identify valid records
+valid_mask = valid_ratings & valid_feedback & unique_records
 
-# Display cleaning results
+# Identify rejected records
+rejected_records = cleaned_data[~valid_mask].copy()
+
+
+# ==========================================
+# ==========================================
+# 8. REJECTION REASONS
+# ==========================================
+
+rejected_records["rejection_reason"] = ""
+
+# Invalid ratings
+rejected_records.loc[
+    ~valid_ratings.loc[rejected_records.index],
+    "rejection_reason"
+] += "Invalid rating; "
+
+# Missing or empty feedback
+rejected_records.loc[
+    ~valid_feedback.loc[rejected_records.index],
+    "rejection_reason"
+] += "Missing or empty feedback; "
+
+# Duplicate records
+rejected_records.loc[
+    ~unique_records.loc[rejected_records.index],
+    "rejection_reason"
+] += "Duplicate record; "
+
+# Keep only valid records
+cleaned_data = cleaned_data[valid_mask].copy()
+
+# ==========================================
+# 9. CLEANING SUMMARY
+# ==========================================
+
+print("\n========== CLEANING SUMMARY ==========")
+
 print("Original records:", len(data))
 print("Clean records:", len(cleaned_data))
-print("Removed records:", len(data) - len(cleaned_data))
+print("Rejected records:", len(rejected_records))
 
+print("\n========== REJECTED RECORDS ==========")
 
-# 6. Calculate average rating
-print("\nAVERAGE CUSTOMER RATING")
-# 7. Calculate average rating
-print("\nAVERAGE CUSTOMER RATING")
-print(cleaned_data["rating"].mean())
+if len(rejected_records) > 0:
+    print(rejected_records.to_string(index=False))
+else:
+    print("No rejected records found.")
+    # ==========================================
+# 10. EXPORT REJECTED RECORDS
+# ==========================================
 
-# 8. Customer rating distribution
-print("\nCUSTOMER RATING DISTRIBUTION")
+rejected_records.to_csv(
+    "data/rejected_records.csv",
+    index=False
+)
 
-rating_distribution = cleaned_data["rating"].value_counts().sort_index()
+print("\nRejected records exported successfully!")
 
-print(rating_distribution)
-
-# 9. Classify reviews using ratings
-positive_reviews = cleaned_data[cleaned_data["rating"] >= 4]
-negative_reviews = cleaned_data[cleaned_data["rating"] <= 2]
-neutral_reviews = cleaned_data[cleaned_data["rating"] == 3]
-
-# 10. Display rating-based classification summary
-print("\nCUSTOMER SENTIMENT SUMMARY")
-
-print("Positive reviews:", len(positive_reviews))
-print("Neutral reviews:", len(neutral_reviews))
-print("Negative reviews:", len(negative_reviews))
-
-
-# 9. Display rating-based classification summary
-print("\nCUSTOMER SENTIMENT SUMMARY")
-
-print("Positive reviews:", len(positive_reviews))
-print("Neutral reviews:", len(neutral_reviews))
-print("Negative reviews:", len(negative_reviews))
-
-print("\n========== ANALYSIS COMPLETE ==========")
+print("\n========== INSIGHTX SUMMARY ==========")
+print("Data cleaning completed successfully.")
